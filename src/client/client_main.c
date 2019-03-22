@@ -1,12 +1,11 @@
 /*
 
-	Client simply establish connection with server and sends, one after the other, all filename received as arguments
-	It waits for the completion of the reception of the requested file before sending the following request
-	When all file requested are received correctly, it sends the QUIT message
-	The information used to connect to the server and to create the socket are retireved through the getaddrinfo function
+	Client simply establish connection with server and sends, one after the other, all filename received as arguments.
+	It waits for the completion of the reception of the requested file before sending the following request.
+	When all files requested are received correctly, it sends the QUIT message.
+	The information used to connect to the server and to create the socket are retrieved through the getaddrinfo function
 	This allows to connect to both ipv4 and ipv6 addresses, if the server port selected is configured for both ip versions.
-	It also allows name resoltion (tested with "localhost")
-	There is still an issue with linklocal ipv6 addresses due to the scope value
+	It also allows name resolution (tested with "localhost").
 	
 */
 
@@ -23,16 +22,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include	"../errlib.h"
-#include	"../sockwrap.h"
+#include	"../../lib/errlib.h"
+#include	"../../lib/sockwrap.h"
 
-
+// defining constant parameters
 #define BUF_LEN 4096
 #define MAX_PATH_LEN 250
 #define MAX_WORK_DIR_LEN 100
 #define TIMEOUT 15
-
-
 
 //global variables
 fd_set readfds;	//set of read from active sockets for select execution
@@ -58,13 +55,13 @@ struct addrinfo *serverinfo;
 struct addrinfo *tmp;
 
 
-
 //functions prototypes
 int elaborate(void);
 void bufferShift(int n);
 void getFileLocalPath(int n);
 int checkErr(int offset);
 int getWorkDir(char *progname);
+
 
 int main(int argc, char **argv) {
 	uint16_t port;
@@ -73,7 +70,6 @@ int main(int argc, char **argv) {
 		filename_size = 0,	//size of the current filename
 		flag = 1;
 			
-	
 	//checking on constant values consistency for string length of file path and working directory path
 	if(MAX_PATH_LEN <= MAX_WORK_DIR_LEN) {
 		fprintf(stderr, "Error: constants invalid values, MAX_PATH_LEN must be higher than MAX_WORK_DIR_LEN.\n");
@@ -181,7 +177,6 @@ int main(int argc, char **argv) {
 			
 			flag_ext = 1;
 		}
-		
 		
 		//this loop is interrupted if a new request has to be sent and the previous has been completed 
 		while(flag_ext) { 
@@ -407,6 +402,7 @@ int main(int argc, char **argv) {
 	return(0);
 }
 
+
 //this function implements the elaboration of received data by the client
 //It firstly look for correctness of the message syntax, then stores locally info about file size and timestamp received
 //lastly receive data untill the size expected is reached. If less data is received, select's timeout should be reached and connection closed.
@@ -608,6 +604,7 @@ int elaborate(void) {
 
 //shifts left by n position the content of buff between n and limit
 void bufferShift(int n) {
+
 	int i,j;
 	
 	for(i = n, j = 0; i < buff_size; i++, j++)
@@ -616,8 +613,10 @@ void bufferShift(int n) {
 	buff_size -= n;
 }
 
+
 //given the index of argv, save the path of the file into localpath
 void getFileLocalPath(int n) {
+
 	int size = strlen(arguments[n]), len = strlen(arguments[n]), i, j, flag = 1;
 	
 	//copying working directory as initial portion of local path
@@ -635,7 +634,6 @@ void getFileLocalPath(int n) {
 		i++;
 	}
 
-	
 	if(len-i > (MAX_PATH_LEN-strlen(work_dir)-1)) {
 		fprintf(stdout, "File name is too long.\n");
 						
@@ -663,6 +661,7 @@ void getFileLocalPath(int n) {
 
 //check in the buffer, starting from offset, if the available received bytes correspond to at least the beginning of "-ERR|CR|LF" message
 int checkErr(int offset) {
+
 	char err_msg[7] = "-ERR\r\n";
 	int k = buff_size - offset; //k stores the number of bytes that are available to be checked
 	
@@ -673,8 +672,10 @@ int checkErr(int offset) {
 	return 0;
 }
 
+
 //store the working directory in work_dir. Return 1 on success, 0 otherwise
 int getWorkDir(char *progname) {
+
 	int i = strlen(progname) -1, flag = 1;
 	
 	for(; i >= 0 && flag; i--) {

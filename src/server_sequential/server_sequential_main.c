@@ -34,11 +34,13 @@
 #include	"../errlib.h"
 #include	"../sockwrap.h"
 
+// defining constant parameters
 #define BUF_LEN 4096
 #define BCKLOG 10
 #define MAX_PATH_LEN 500
 #define MAX_WORK_DIR_LEN 200
 #define TIMEOUT 10
+
 
 //types definitions
 struct sock_data {
@@ -89,7 +91,6 @@ void shut_down_server(void);
 void close_connection(int socket);
 int getWorkDir(char *progname);
 int checkPathPermissions(char * path);
-
 
 
 int main(int argc, char **argv) {
@@ -354,6 +355,7 @@ int main(int argc, char **argv) {
 		flag = 1;
 	}	
 }
+
 
 //function implementing the service of the server, both sending and receiving functionalities
 void service(int socket, int rw) {
@@ -700,6 +702,7 @@ void service(int socket, int rw) {
 	
 	return;
 }
+			
 									
 //this function execute all checkings necessary to find out if a correct GET message is received and if the file requested is available 
 //it only needs the index associated to the receiving socket to get access to its data structure SockeData:
@@ -843,6 +846,7 @@ int checkGet(int k) {
 	return tot_check;
 }
 
+
 //return number of bytes checked if QUIT message is recognized, otherwise return -1
 int checkQuit(int k) {
 	
@@ -853,14 +857,15 @@ int checkQuit(int k) {
 	return -1;
 }
 
-//sending ERR message
+
+//sending -ERR message
 void sendErrMsg(int sock) {
+
 	ssize_t nsend;
 	char buff[6];
 	fd_set set;
 	int flag = 1, val;
 	struct timeval tv;
-	
 	
 	//filling buff with ERR message
 	strncpy(buff, "-ERR", (size_t)4);
@@ -910,6 +915,7 @@ void sendErrMsg(int sock) {
 
 //return the fd of next available socket in fd_set
 int getNextReadAvailSkt(fd_set *rset) {
+
 	int k = list.lastr+1, i;
 	
 	//loop that start checking from the socket right after the last one served
@@ -947,6 +953,7 @@ int getSockIndex(int socket) {
 	return -1;
 }
 
+
 //return the index in the list.wfds array corresponding to the socket id received
 int getWriteToSockIndex(int socket) {
 	for(int i = 0; i < list.nw; i++) {
@@ -955,6 +962,7 @@ int getWriteToSockIndex(int socket) {
 	}
 	return -1;
 }
+
 
 //shifts left by n position the content of buff between n and limit
 void bufferShift(int k, int n) {
@@ -986,8 +994,10 @@ void shut_down_server() {
 	exit(1);
 }
 
+
 //close connection established on the specified socket
 void close_connection( int socket) {
+
 	int i, k = getSockIndex(socket), flag = 1;
 	
 	//removing socket from active list
@@ -1055,8 +1065,10 @@ void close_connection( int socket) {
 	return;
 }
 
+
 //retrieve server working directory path from the name of the program
 int getWorkDir(char *progname) {
+
 	int i = strlen(progname) -1, flag = 1;
 	
 	for(; i >= 0 && flag; i--) {
@@ -1085,8 +1097,10 @@ int getWorkDir(char *progname) {
 	return 1;
 }
 
+
 //check if the path of the file requested, in the filesystem directories hierarchy, is at same level or below the server working directory
 int checkPathPermissions(char * path) {
+
 	int i = strlen(work_dir), n = strlen(path), count = 0;
 	
 	if(path[i] == '/')
@@ -1113,6 +1127,4 @@ int checkPathPermissions(char * path) {
 		return 0;
 	return 1;
 }
-				
-	 
 

@@ -18,9 +18,10 @@
 #include 	<signal.h>
 #include	<fcntl.h>
 #include	<errno.h>
-#include	"../errlib.h"
-#include	"../sockwrap.h"
+#include	"../../lib/errlib.h"
+#include	"../../lib/sockwrap.h"
 
+// defining constant parameters
 #define BUF_LEN 4096
 #define BCKLOG 10
 #define MAX_PATH_LEN 500
@@ -79,8 +80,6 @@ int getNextWriteAvailSkt(fd_set *wset);
 int getSockIndex(int socket);
 int getWriteToSockIndex(int socket);
 ***********************************************/
-
-
 
 //handler for the SIGCHLD signal, received by the parent process when a child exits
 void sig_chld_handler(int signo) {
@@ -171,6 +170,7 @@ void sig_int_handler_main(int signo) {
 	return;
 }
 
+
 //handler for children processes for SIGINT signal
 void sig_int_handler_child(int signo) {
 	int i, flag = 1;
@@ -194,8 +194,6 @@ void sig_int_handler_child(int signo) {
 }
 	
 				 			
-				 
-
 int main(int argc, char **argv) {
 	uint16_t porth4, portn4, porth6, portn6;
 	int sock;
@@ -512,6 +510,7 @@ void routine(int sock) {
 	
 }
 
+
 //function implementing the service of the server, both sending and receiving functionalities
 int service(SockData *data, int rw) {
 	ssize_t	nrec,	//number of bytes received from socket
@@ -807,6 +806,7 @@ int service(SockData *data, int rw) {
 	
 	return 1;
 }
+
 									
 //this function execute all checkings necessary to find out if a correct GET message is received and if the file requested is available 
 //it only needs the SockData struct reference associated to the receiving socket to get access to its data:
@@ -948,6 +948,7 @@ int checkGet(SockData * data) {
 	return tot_check;
 }
 
+
 //return number of bytes checked if QUIT message is recognized, otherwise return -1
 int checkQuit(SockData * data) {
 	
@@ -958,8 +959,10 @@ int checkQuit(SockData * data) {
 	return -1;
 }
 
-//sending ERR message
+
+//sending -ERR message
 void sendErrMsg(int sock) {
+
 	ssize_t nsend;
 	char buff[6];
 	fd_set set;
@@ -1015,6 +1018,7 @@ void sendErrMsg(int sock) {
 
 //shifts left by n position the content of buff between n and limit
 void bufferShift(SockData *data, int n) {
+
 	int i,j;
 	char *buff = data->buff;
 	int limit = data->size; 
@@ -1025,8 +1029,10 @@ void bufferShift(SockData *data, int n) {
 	data->size -= n;
 }
 
+
 //retrieve client working directory path from the name of the program
 int getWorkDir(char *progname) {
+
 	int i = strlen(progname) -1, flag = 1;
 	
 	for(; i >= 0 && flag; i--) {
@@ -1055,8 +1061,11 @@ int getWorkDir(char *progname) {
 	return 1;
 }
 
-//check if the path of the file requested, in the filesystem directories hierarchy, is at same level or below the client working directory
+
+//check if the path of the file requested, in the filesystem directories hierarchy, 
+//is at same level or below the client working directory
 int checkPathPermissions(char * path) {
+
 	int i = strlen(work_dir), n = strlen(path), count = 0;
 	
 	if(path[i] == '/')
@@ -1066,23 +1075,24 @@ int checkPathPermissions(char * path) {
 		if(path[i] == '/')
 			count ++;
 		else if(path[i] == '.') {
-				i++;
-				if(i < n) {
-					if(path[i] == '.') {
-						i++;
-						if(i < n) {
-							if(path[i] == '/') {
-								count --;
-							}
+			i++;
+			if(i < n) {
+				if(path[i] == '.') {
+					i++;
+					if(i < n) {
+						if(path[i] == '/') {
+							count --;
 						}
 					}
 				}
+			}
 		}
 	}
 	if(count < 0)
 		return 0;
 	return 1;
 }
+
 
 //this function try to close the socket received as argument.
 //if success exits 0, otherwise exits 1
